@@ -28,8 +28,8 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label small fw-semibold">Kategori <span class="text-danger">*</span></label>
-                <select name="kategori_id" class="form-select" required>
-                    <option value="">-- Pilih Kategori --</option>
+                <select name="kategori_id" class="form-select select2" required data-placeholder="-- Cari atau Pilih Kategori --">
+                    <option value=""></option>
                     <?php foreach ($kategori as $k): ?>
                         <option value="<?= (int) $k['id'] ?>" <?= (int) old('kategori_id', $barang['kategori_id'] ?? 0) === (int) $k['id'] ? 'selected' : '' ?>>
                             <?= esc($k['nama']) ?>

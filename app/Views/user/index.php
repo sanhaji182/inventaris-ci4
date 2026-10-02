@@ -27,9 +27,9 @@
 </div>
 
 <!-- Table Card -->
-<div class="card">
+<div class="card p-3">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 datatable" id="tabelUser">
             <thead class="table-light">
                 <tr>
                     <th style="width:70px">ID</th>

@@ -18,7 +18,7 @@
             <input type="text" name="cari" class="form-control form-control-sm" placeholder="Cari nama, kode, toko, minus..." value="<?= esc($cari) ?>">
         </div>
         <div class="col-md-4">
-            <select name="kategori" class="form-select form-select-sm">
+            <select name="kategori" class="form-select form-select-sm select2" data-placeholder="Semua Kategori">
                 <option value="">Semua Kategori</option>
                 <?php foreach ($kategori as $k): ?>
                     <option value="<?= (int) $k['id'] ?>" <?= $kategoriId === (int) $k['id'] ? 'selected' : '' ?>>
@@ -37,9 +37,9 @@
 </div>
 
 <!-- Table Card -->
-<div class="card">
+<div class="card p-3">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 datatable" id="tabelBarang">
             <thead class="table-light">
                 <tr>
                     <th style="width:100px">Kode</th>

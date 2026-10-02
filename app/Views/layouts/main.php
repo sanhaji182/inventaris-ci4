@@ -16,6 +16,12 @@
 
     <!-- Custom Clean Modern Light Design Tokens -->
     <link href="/css/app.css" rel="stylesheet">
+
+    <!-- jQuery, Select2 & DataTables (Bootstrap 5 theme) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
 </head>
 <body>
     <!-- Mobile Backdrop -->
@@ -162,8 +168,58 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
     <script src="/js/app.js"></script>
+    <script>
+        // Inisialisasi Global untuk Select2 & DataTables (Bahasa Indonesia & Tema Modern)
+        $(document).ready(function() {
+            // Inisialisasi otomatis semua class .select2
+            $('.select2').each(function() {
+                var placeholder = $(this).attr('placeholder') || '-- Pilih Opsi --';
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: placeholder,
+                    dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : $(document.body)
+                });
+            });
+
+            // Default config untuk DataTables
+            $.extend(true, $.fn.dataTable.defaults, {
+                responsive: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Cari data cepat...",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ - _END_ dari total _TOTAL_ data",
+                    infoEmpty: "Tidak ada data yang tersedia",
+                    infoFiltered: "(disaring dari total _MAX_ entri)",
+                    zeroRecords: "Tidak ditemukan data yang cocok",
+                    paginate: {
+                        first: '<i class="bi bi-chevron-double-left"></i>',
+                        previous: '<i class="bi bi-chevron-left"></i>',
+                        next: '<i class="bi bi-chevron-right"></i>',
+                        last: '<i class="bi bi-chevron-double-right"></i>'
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]]
+            });
+
+            // Inisialisasi otomatis class .datatable
+            $('.datatable').each(function() {
+                if (!$.fn.DataTable.isDataTable(this)) {
+                    $(this).DataTable();
+                }
+            });
+        });
+    </script>
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>

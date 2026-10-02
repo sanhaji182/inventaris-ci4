@@ -12,9 +12,9 @@
 </div>
 
 <!-- Table Card -->
-<div class="card">
+<div class="card p-3">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 datatable" id="tabelStok">
             <thead class="table-light">
                 <tr>
                     <th style="width:110px">Tanggal</th>
@@ -82,8 +82,8 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Pilih Barang <span class="text-danger">*</span></label>
-                    <select name="barang_id" id="modalBarangId" class="form-select" required onchange="updateBarangInfo()">
-                        <option value="">-- Pilih Barang dari Inventaris --</option>
+                    <select name="barang_id" id="modalBarangId" class="form-select select2" required onchange="updateBarangInfo()" data-placeholder="-- Cari atau Pilih Barang --">
+                        <option value=""></option>
                         <?php foreach ($barangList as $b): ?>
                             <option value="<?= (int) $b['id'] ?>"
                                     data-stok="<?= (int) $b['stok'] ?>"
