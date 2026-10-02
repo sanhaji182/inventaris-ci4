@@ -10,23 +10,27 @@
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* Light Mode Palette */
+    /* Light Mode Palette — Clean, Bright, Crisp & Modern */
     --bg-body: #f8fafc;
-    --bg-body-radial: radial-gradient(1200px 600px at 100% -10%, rgba(99, 102, 241, 0.05), transparent),
-                      radial-gradient(1000px 500px at -10% 20%, rgba(16, 185, 129, 0.04), transparent);
+    --bg-body-radial: radial-gradient(1200px 600px at 100% -10%, rgba(99, 102, 241, 0.04), transparent),
+                      radial-gradient(1000px 500px at -10% 20%, rgba(14, 165, 233, 0.03), transparent);
     --surface: #ffffff;
-    --surface-alt: #f1f5f9;
-    --surface-hover: #f8fafc;
+    --surface-alt: #f8fafc;
+    --surface-hover: #f1f5f9;
     --surface-border: #e2e8f0;
-    --surface-border-subtle: #edf2f7;
+    --surface-border-subtle: #f1f5f9;
 
-    --sidebar-bg: #0f172a;
-    --sidebar-border: rgba(255, 255, 255, 0.08);
-    --sidebar-text: #94a3b8;
-    --sidebar-text-hover: #f8fafc;
-    --sidebar-active-bg: rgba(99, 102, 241, 0.15);
-    --sidebar-active-text: #ffffff;
-    --sidebar-active-bar: #6366f1;
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-brand-title: #0f172a;
+    --sidebar-text: #64748b;
+    --sidebar-text-hover: #0f172a;
+    --sidebar-hover-bg: #f1f5f9;
+    --sidebar-active-bg: #eef2ff;
+    --sidebar-active-text: #4f46e5;
+    --sidebar-active-bar: #4f46e5;
+    --sidebar-section-title: #94a3b8;
+    --sidebar-scrollbar-thumb: rgba(0, 0, 0, 0.08);
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -75,11 +79,15 @@
 
     --sidebar-bg: #090d16;
     --sidebar-border: #1f293d;
+    --sidebar-brand-title: #ffffff;
     --sidebar-text: #94a3b8;
     --sidebar-text-hover: #f1f5f9;
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
     --sidebar-active-bg: rgba(99, 102, 241, 0.2);
     --sidebar-active-text: #ffffff;
     --sidebar-active-bar: #818cf8;
+    --sidebar-section-title: #475569;
+    --sidebar-scrollbar-thumb: rgba(255, 255, 255, 0.1);
 
     --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
@@ -185,7 +193,7 @@ a:hover {
 .brand-title {
     font-weight: 700;
     font-size: 1.05rem;
-    color: #fff;
+    color: var(--sidebar-brand-title);
     letter-spacing: -0.02em;
 }
 
@@ -207,7 +215,7 @@ a:hover {
     width: 4px;
 }
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--sidebar-scrollbar-thumb);
     border-radius: 4px;
 }
 
@@ -216,7 +224,7 @@ a:hover {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 700;
-    color: #475569;
+    color: var(--sidebar-section-title);
     padding: 0.85rem 0.75rem 0.35rem;
     margin: 0;
 }
@@ -242,7 +250,7 @@ a:hover {
 
 .sidebar-nav .nav-link:hover {
     color: var(--sidebar-text-hover);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--sidebar-hover-bg);
 }
 .sidebar-nav .nav-link:hover i {
     transform: translateX(2px);
@@ -250,7 +258,7 @@ a:hover {
 }
 
 .sidebar-nav .nav-link.active {
-    color: #ffffff;
+    color: var(--sidebar-active-text);
     background: var(--sidebar-active-bg);
     font-weight: 600;
 }

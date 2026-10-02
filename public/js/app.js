@@ -12,7 +12,8 @@
     function getInitialTheme() {
         const saved = localStorage.getItem(THEME_KEY);
         if (saved) return saved;
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        // Default ke light mode sesuai preferensi clean & modern
+        return 'light';
     }
 
     function applyTheme(theme) {

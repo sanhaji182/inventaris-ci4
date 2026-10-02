@@ -102,10 +102,10 @@
         <div class="sidebar-footer">
             <div class="d-flex align-items-center gap-2">
                 <span class="badge-dot pulse badge-soft-success" style="font-size:0.7rem;">Live</span>
-                <span class="small text-muted" style="font-size:0.75rem;">CI4 v4.7.4</span>
+                <span class="small" style="color: var(--sidebar-text); font-size:0.75rem;">CI4 v4.7.4</span>
             </div>
-            <a href="https://github.com/sanhaji182/inventaris-ci4" target="_blank" class="text-muted" title="Source Code">
-                <i class="bi bi-github"></i>
+            <a href="/logout" class="btn btn-sm btn-link p-0" style="color: var(--sidebar-text);" title="Keluar" onclick="return confirm('Keluar dari aplikasi?')">
+                <i class="bi bi-box-arrow-right fs-6"></i>
             </a>
         </div>
     </aside>

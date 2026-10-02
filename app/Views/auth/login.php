@@ -15,17 +15,17 @@
 
     <style>
         body {
-            background-color: #0b0f17;
+            background-color: #f8fafc;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.04) 0px, transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
-            color: #f8fafc;
+            color: #0f172a;
             position: relative;
             overflow-x: hidden;
         }
@@ -37,19 +37,17 @@
         }
 
         .login-card {
-            background: rgba(17, 24, 39, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.03);
             padding: 2.25rem 2rem;
             position: relative;
         }
 
         .brand-badge {
-            width: 60px;
-            height: 60px;
+            width: 58px;
+            height: 58px;
             border-radius: 16px;
             background: linear-gradient(135deg, #4f46e5 0%, #38bdf8 100%);
             color: #fff;
@@ -57,7 +55,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.75rem;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
             margin-bottom: 1.25rem;
         }
 
@@ -65,166 +63,213 @@
             position: relative;
         }
         .input-group-modern input {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            color: #fff !important;
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
             border-radius: 10px !important;
             padding: 0.65rem 1rem 0.65rem 2.6rem !important;
             font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
         .input-group-modern input:focus {
-            border-color: #6366f1 !important;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+            background: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
         }
         .input-group-modern .input-icon {
             position: absolute;
-            left: 0.95rem;
+            left: 0.85rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #64748b;
-            font-size: 1rem;
+            color: #94a3b8;
             z-index: 5;
-            pointer-events: none;
+            font-size: 1rem;
         }
-        .btn-toggle-pwd {
+        .input-group-modern .toggle-pwd {
             position: absolute;
             right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #64748b;
+            color: #94a3b8;
+            padding: 0.25rem;
             cursor: pointer;
             z-index: 5;
-            padding: 0.25rem;
+            transition: color 0.15s;
         }
-        .btn-toggle-pwd:hover {
-            color: #cbd5e1;
+        .input-group-modern .toggle-pwd:hover {
+            color: #0f172a;
         }
 
         .quick-demo-pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #475569;
             font-size: 0.75rem;
-            padding: 0.3rem 0.65rem;
+            padding: 0.35rem 0.65rem;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
             cursor: pointer;
             transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.3rem;
+            font-weight: 500;
         }
         .quick-demo-pill:hover {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: #818cf8;
-            color: #fff;
+            background: #eef2ff;
+            color: #4f46e5;
+            border-color: #c7d2fe;
             transform: translateY(-1px);
+        }
+
+        .btn-login-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-login-gradient:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+            color: #fff;
+        }
+
+        /* Ambient Glowing Background Elements */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.5;
+        }
+        .glow-orb-1 {
+            width: 320px;
+            height: 320px;
+            background: #c7d2fe;
+            top: 10%;
+            left: 15%;
+        }
+        .glow-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: #bae6fd;
+            bottom: 10%;
+            right: 15%;
         }
     </style>
 </head>
 <body>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+
     <div class="login-wrapper">
         <div class="login-card">
-            <div class="text-center mb-4">
+            <!-- Brand -->
+            <div class="text-center">
                 <div class="brand-badge">
-                    <i class="bi bi-box-seam"></i>
+                    <i class="bi bi-box-seam-fill"></i>
                 </div>
-                <h3 class="fw-bold mb-1" style="letter-spacing: -0.02em;">Sistem Inventaris</h3>
-                <p class="text-secondary small mb-0">Platform Manajemen Stok, IMEI & Kasir Multi-Unit</p>
+                <h3 class="fw-bold mb-1" style="letter-spacing: -0.02em; color: #0f172a;">Sistem Inventaris</h3>
+                <p class="text-muted small mb-4">Platform Manajemen Stok, IMEI & Kasir Multi-Unit</p>
             </div>
 
-            <?php if ($flash = session()->getFlashdata('error')): ?>
-                <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <div><?= esc($flash) ?></div>
+            <!-- Flash Alert -->
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger py-2 px-3 small rounded-3 d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                    <div><?= esc(session()->getFlashdata('error')) ?></div>
                 </div>
             <?php endif; ?>
 
-            <?php if ($flash = session()->getFlashdata('sukses')): ?>
-                <div class="alert alert-success py-2 px-3 small d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <div><?= esc($flash) ?></div>
+            <?php if (session()->getFlashdata('sukses')): ?>
+                <div class="alert alert-success py-2 px-3 small rounded-3 d-flex align-items-center mb-3">
+                    <i class="bi bi-check-circle-fill me-2 fs-6"></i>
+                    <div><?= esc(session()->getFlashdata('sukses')) ?></div>
                 </div>
             <?php endif; ?>
 
+            <!-- Form -->
             <form method="POST" action="/login">
                 <?= csrf_field() ?>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold text-secondary">Username</label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">Username</label>
                     <div class="input-group-modern">
                         <i class="bi bi-person input-icon"></i>
                         <input type="text" id="inputUsername" name="username" class="form-control" required autofocus
-                               placeholder="Masukkan username" value="<?= esc(old('username')) ?>">
+                               placeholder="Masukkan username" value="<?= old('username') ?>">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold text-secondary">Password</label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">Password</label>
                     <div class="input-group-modern">
-                        <i class="bi bi-lock input-icon"></i>
+                        <i class="bi bi-key input-icon"></i>
                         <input type="password" id="inputPassword" name="password" class="form-control" required
                                placeholder="••••••••">
-                        <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Lihat Password">
+                        <button type="button" class="toggle-pwd" id="btnTogglePwd" title="Lihat Password">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
 
+                <!-- 1-Click Demo Pills -->
                 <div class="mb-4">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="small text-secondary" style="font-size:0.75rem;">Akun demo 1-klik:</span>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2">
+                    <label class="form-label small text-muted d-block mb-1" style="font-size:0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Pilih Akun Demo (1-Klik)</label>
+                    <div class="d-flex flex-wrap gap-1">
                         <button type="button" class="quick-demo-pill" data-user="admin" data-pass="admin123">
-                            <i class="bi bi-shield-check text-warning"></i> Admin
+                            <i class="bi bi-shield-check text-primary"></i> Admin
                         </button>
                         <button type="button" class="quick-demo-pill" data-user="pembeli" data-pass="pembeli123">
-                            <i class="bi bi-cart text-info"></i> Kasir
+                            <i class="bi bi-shop text-success"></i> Kasir
                         </button>
                         <button type="button" class="quick-demo-pill" data-user="staf" data-pass="staf123">
-                            <i class="bi bi-boxes text-success"></i> Gudang
+                            <i class="bi bi-boxes text-info"></i> Gudang
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2" style="font-size:0.95rem; border-radius:10px;">
-                    <span>Masuk ke Dashboard</span>
-                    <i class="bi bi-arrow-right ms-1"></i>
+                <button type="submit" class="btn btn-login-gradient w-100">
+                    Masuk ke Dashboard <i class="bi bi-arrow-right ms-1"></i>
                 </button>
             </form>
 
-            <div class="text-center mt-4 pt-2 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
-                <span class="small text-secondary" style="font-size:0.75rem;">
+            <div class="text-center mt-4 pt-2 border-top">
+                <small class="text-muted" style="font-size:0.75rem;">
                     CodeIgniter 4 · Single Unit IMEI Tracking · MariaDB
-                </span>
+                </small>
             </div>
         </div>
     </div>
 
     <script>
-        // 1-Click Demo Account Picker
-        document.querySelectorAll('.quick-demo-pill').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const u = this.getAttribute('data-user');
-                const p = this.getAttribute('data-pass');
-                document.getElementById('inputUsername').value = u;
-                document.getElementById('inputPassword').value = p;
-                
-                // Visual pulse feedback
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => this.style.transform = '', 150);
-            });
-        });
-
-        // Show / Hide Password
+        // Toggle Password Visibility
         const btnToggle = document.getElementById('btnTogglePwd');
         const inputPwd = document.getElementById('inputPassword');
-        btnToggle?.addEventListener('click', () => {
-            const isPwd = inputPwd.type === 'password';
-            inputPwd.type = isPwd ? 'text' : 'password';
-            btnToggle.innerHTML = isPwd ? '<i class="bi bi-eye-slash text-primary"></i>' : '<i class="bi bi-eye"></i>';
+        btnToggle.addEventListener('click', () => {
+            const isPassword = inputPwd.type === 'password';
+            inputPwd.type = isPassword ? 'text' : 'password';
+            btnToggle.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+        });
+
+        // Quick Demo Auto-filler
+        document.querySelectorAll('.quick-demo-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const u = btn.dataset.user;
+                const p = btn.dataset.pass;
+                document.getElementById('inputUsername').value = u;
+                document.getElementById('inputPassword').value = p;
+                btn.style.transform = 'scale(0.96)';
+                setTimeout(() => btn.style.transform = '', 150);
+            });
         });
     </script>
 </body>
