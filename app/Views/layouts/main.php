@@ -3,142 +3,187 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= esc($title ?? 'Inventaris') ?> · Sistem Inventaris</title>
+    <title><?= esc($title ?? 'Inventaris') ?> · Sistem Inventaris Unit & Stok</title>
+    
+    <!-- Fonts & Bootstrap 5 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --sidebar-w: 240px;
-            --topbar-h: 56px;
-            --bg-body: #f5f6fa;
-            --bg-sidebar: #1e293b;
-        }
-        body { background: var(--bg-body); font-size: 0.925rem; }
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: var(--sidebar-w); background: var(--bg-sidebar);
-            color: #cbd5e1; z-index: 1030; overflow-y: auto;
-            transition: margin-left .25s;
-        }
-        .sidebar .brand {
-            display: flex; align-items: center; gap: .6rem;
-            padding: 1rem 1.25rem; color: #fff; font-weight: 600;
-            border-bottom: 1px solid rgba(255,255,255,.08);
-        }
-        .sidebar .nav-link {
-            color: #cbd5e1; padding: .55rem 1.25rem; display: flex;
-            align-items: center; gap: .65rem; border-radius: 0;
-        }
-        .sidebar .nav-link:hover { background: rgba(255,255,255,.06); color: #fff; }
-        .sidebar .nav-link.active { background: #3b82f6; color: #fff; }
-        .sidebar .section-label {
-            font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
-            color: #64748b; padding: 1rem 1.25rem .35rem; margin: 0;
-        }
-        .main {
-            margin-left: var(--sidebar-w);
-            min-height: 100vh;
-        }
-        .topbar {
-            height: var(--topbar-h); background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 1.25rem; position: sticky; top: 0; z-index: 1020;
-        }
-        .content { padding: 1.25rem; }
-        @media (max-width: 991.98px) {
-            .sidebar { margin-left: calc(-1 * var(--sidebar-w)); }
-            .sidebar.show { margin-left: 0; }
-            .main { margin-left: 0; }
-        }
-        .card { border: none; box-shadow: 0 1px 3px rgba(0,0,0,.07); border-radius: .6rem; }
-        .table > :not(caption) > * > * { padding: .6rem .75rem; }
-        .badge-soft-success { background:#dcfce7; color:#166534; }
-        .badge-soft-danger  { background:#fee2e2; color:#991b1b; }
-        .badge-soft-warning { background:#fef3c7; color:#92400e; }
-        .badge-soft-info    { background:#dbeafe; color:#1e40af; }
-        .badge-soft-secondary { background:#e2e8f0; color:#334155; }
-        .stat-card .label { color:#64748b; font-size:.8rem; }
-        .stat-card .value { font-size:1.5rem; font-weight:700; }
-        .stat-card .icon {
-            width:42px;height:42px;border-radius:.55rem;display:flex;
-            align-items:center;justify-content:center;font-size:1.2rem;
-        }
-    </style>
+    
+    <!-- Custom Modern Design System -->
+    <link href="/css/app.css" rel="stylesheet">
+
+    <!-- Anti-flicker theme init -->
+    <script>
+        (function() {
+            const saved = localStorage.getItem('inventaris_theme');
+            const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
-    <nav class="sidebar" id="sidebar">
-        <div class="brand"><i class="bi bi-box-seam"></i> Inventaris</div>
-        <ul class="nav flex-column pb-3">
-            <p class="section-label">Utama</p>
-            <li><a class="nav-link <?= url_is('dashboard') || url_is('/') ? 'active' : '' ?>" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+    <!-- Mobile Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-            <p class="section-label">Transaksi</p>
-            <li><a class="nav-link <?= url_is('pembelian*') ? 'active' : '' ?>" href="/pembelian"><i class="bi bi-cart-plus"></i> Pembelian</a></li>
-            <li><a class="nav-link <?= url_is('penjualan*') ? 'active' : '' ?>" href="/penjualan"><i class="bi bi-cash-coin"></i> Penjualan</a></li>
-            <li><a class="nav-link <?= url_is('utang*') ? 'active' : '' ?>" href="/utang"><i class="bi bi-credit-card-2-front"></i> Utang</a></li>
-
-            <p class="section-label">Master</p>
-            <li><a class="nav-link <?= url_is('unit*') ? 'active' : '' ?>" href="/unit"><i class="bi bi-phone"></i> Unit Stok</a></li>
-            <li><a class="nav-link <?= url_is('barang*') ? 'active' : '' ?>" href="/barang"><i class="bi bi-collection"></i> Barang</a></li>
-            <li><a class="nav-link <?= url_is('kategori*') ? 'active' : '' ?>" href="/kategori"><i class="bi bi-tags"></i> Kategori</a></li>
-            <li><a class="nav-link <?= url_is('supplier*') ? 'active' : '' ?>" href="/supplier"><i class="bi bi-truck"></i> Supplier</a></li>
-
-            <p class="section-label">Laporan</p>
-            <li><a class="nav-link <?= url_is('laporan*') ? 'active' : '' ?>" href="/laporan"><i class="bi bi-graph-up"></i> Laporan</a></li>
-
-            <?php if (session('role') === 'admin'): ?>
-            <p class="section-label">Admin</p>
-            <li><a class="nav-link <?= url_is('user*') ? 'active' : '' ?>" href="/user"><i class="bi bi-people"></i> Pengguna</a></li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-
-    <div class="main">
-        <div class="topbar">
-            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="btnSidebar"><i class="bi bi-list"></i></button>
-            <div class="d-none d-md-block fw-semibold"><?= esc($title ?? '') ?></div>
-            <div class="dropdown">
-                <a class="d-flex align-items-center gap-2 text-decoration-none" href="#" data-bs-toggle="dropdown">
-                    <span class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px">
-                        <?= esc(strtoupper(substr(session('nama') ?? 'U', 0, 1))) ?>
-                    </span>
-                    <div class="d-none d-md-block">
-                        <div class="fw-semibold small"><?= esc(session('nama')) ?></div>
-                        <div class="text-muted" style="font-size:.72rem"><?= esc(session('role')) ?></div>
-                    </div>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
-                </ul>
-                <noscript><a class="btn btn-sm btn-link" href="/logout">Keluar</a></noscript>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div>
+                <div class="brand-title">Inventaris</div>
+                <div class="brand-subtitle">Tracking & Kasir</div>
             </div>
         </div>
 
-        <div class="content">
-            <?php if ($flash = session()->getFlashdata('sukses')): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <?= esc($flash) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-            <?php if ($flash = session()->getFlashdata('error')): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= esc($flash) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+        <nav class="sidebar-nav">
+            <p class="nav-section-title">Ringkasan</p>
+            <a class="nav-link <?= url_is('dashboard') || url_is('/') ? 'active' : '' ?>" href="/dashboard">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
 
-            <?= $this->renderSection('content') ?>
+            <p class="nav-section-title">Aktivitas Toko</p>
+            <a class="nav-link <?= url_is('penjualan*') ? 'active' : '' ?>" href="/penjualan">
+                <i class="bi bi-receipt-cutoff"></i>
+                <span>Kasir & Penjualan</span>
+            </a>
+            <a class="nav-link <?= url_is('pembelian*') ? 'active' : '' ?>" href="/pembelian">
+                <i class="bi bi-bag-plus-fill"></i>
+                <span>Pembelian Stok</span>
+            </a>
+            <a class="nav-link <?= url_is('utang*') ? 'active' : '' ?>" href="/utang">
+                <i class="bi bi-wallet2"></i>
+                <span>Utang & Cicilan</span>
+            </a>
+
+            <p class="nav-section-title">Inventaris Fisik</p>
+            <a class="nav-link <?= url_is('unit*') ? 'active' : '' ?>" href="/unit">
+                <i class="bi bi-phone-fill"></i>
+                <span>Unit Fisik (IMEI)</span>
+            </a>
+            <a class="nav-link <?= url_is('barang*') ? 'active' : '' ?>" href="/barang">
+                <i class="bi bi-boxes"></i>
+                <span>Katalog Barang</span>
+            </a>
+            <a class="nav-link <?= url_is('kategori*') ? 'active' : '' ?>" href="/kategori">
+                <i class="bi bi-tags-fill"></i>
+                <span>Kategori</span>
+            </a>
+            <a class="nav-link <?= url_is('supplier*') ? 'active' : '' ?>" href="/supplier">
+                <i class="bi bi-truck"></i>
+                <span>Pemasok (Supplier)</span>
+            </a>
+
+            <p class="nav-section-title">Laporan Keuangan</p>
+            <a class="nav-link <?= url_is('laporan*') ? 'active' : '' ?>" href="/laporan">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Laba Rugi & Rekap</span>
+            </a>
+
+            <?php if (session('role') === 'admin'): ?>
+            <p class="nav-section-title">Administrasi</p>
+            <a class="nav-link <?= url_is('user*') ? 'active' : '' ?>" href="/user">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Manajemen User</span>
+            </a>
+            <?php endif; ?>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-dot pulse badge-soft-success" style="font-size:0.7rem;">Live</span>
+                <span class="small text-muted" style="font-size:0.75rem;">CI4 v4.7.4</span>
+            </div>
+            <a href="https://github.com/sanhaji182/inventaris-ci4" target="_blank" class="text-muted" title="Source Code">
+                <i class="bi bi-github"></i>
+            </a>
         </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-outline-secondary d-lg-none" id="btnSidebar" type="button" aria-label="Toggle Sidebar">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h1 class="page-title h5 mb-0">
+                    <?= esc($title ?? 'Sistem Inventaris') ?>
+                </h1>
+            </div>
+
+            <div class="topbar-actions">
+                <!-- Quick Search Input -->
+                <div class="quick-search-box d-none d-md-block">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="globalQuickSearch" placeholder="Cari cepat... (Ctrl+K)" autocomplete="off">
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button class="btn-theme-toggle" type="button" title="Ganti Mode Terang/Gelap" aria-label="Toggle Theme">
+                    <i class="bi bi-moon-stars text-secondary"></i>
+                </button>
+
+                <!-- User Profile Pill -->
+                <div class="dropdown">
+                    <a class="user-menu-pill" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="avatar-initial">
+                            <?= esc(strtoupper(substr(session('nama') ?? 'U', 0, 1))) ?>
+                        </div>
+                        <div class="d-none d-sm-block text-start pe-1">
+                            <div class="fw-semibold small lh-1 mb-1 text-truncate" style="max-width:120px;">
+                                <?= esc(session('nama')) ?>
+                            </div>
+                            <span class="badge badge-soft-primary px-1 py-0" style="font-size:0.65rem;">
+                                <?= esc(ucfirst(session('role') ?? 'staff')) ?>
+                            </span>
+                        </div>
+                        <i class="bi bi-chevron-down text-muted small ms-1"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="border-radius: var(--radius-md); min-width: 190px;">
+                        <li class="px-3 py-2 border-bottom">
+                            <div class="fw-bold small"><?= esc(session('nama')) ?></div>
+                            <div class="text-muted" style="font-size:0.75rem;">@<?= esc(session('username')) ?></div>
+                        </li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Body -->
+        <main class="content-body">
+            <?= $this->renderSection('content') ?>
+        </main>
     </div>
 
+    <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+
+    <!-- Flash Notification via Toast -->
     <script>
-        document.getElementById('btnSidebar')?.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('show');
+        document.addEventListener('DOMContentLoaded', () => {
+            <?php if ($flash = session()->getFlashdata('sukses')): ?>
+                window.showToast(<?= json_encode($flash) ?>, 'success');
+            <?php endif; ?>
+            <?php if ($flash = session()->getFlashdata('error')): ?>
+                window.showToast(<?= json_encode($flash) ?>, 'error');
+            <?php endif; ?>
         });
     </script>
+
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>
