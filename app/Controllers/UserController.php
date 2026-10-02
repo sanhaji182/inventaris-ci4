@@ -6,63 +6,73 @@ use App\Models\UserModel;
 
 class UserController extends BaseController
 {
+    protected UserModel $userModel;
+
+    public function __construct()
+    {
+        $this->userModel = new UserModel();
+    }
+
     public function index()
     {
-        $user = new UserModel();
+        $users = $this->userModel->orderBy('id', 'ASC')->findAll();
 
         return view('user/index', [
-            'title' => 'Manajemen Pengguna',
-            'users' => $user->orderBy('role')->orderBy('username')->findAll(),
+            'title' => 'Manajemen Hak Akses Pengguna',
+            'users' => $users,
         ]);
     }
 
     public function save()
     {
-        $user = new UserModel();
-        $id   = (int) $this->request->getPost('id');
+        $id = (int) $this->request->getPost('id');
+        $nama = trim((string) $this->request->getPost('nama'));
+        $username = trim((string) $this->request->getPost('username'));
+        $password = (string) $this->request->getPost('password');
+        $role = (string) $this->request->getPost('role');
 
-        $data = [
-            'username' => strtolower(trim((string) $this->request->getPost('username'))),
-            'nama'     => trim((string) $this->request->getPost('nama')),
-            'role'     => (string) $this->request->getPost('role'),
-            'status'   => (string) $this->request->getPost('status') ?: 'aktif',
+        $rules = [
+            'nama' => 'required|min_length[3]|max_length[100]',
+            'role' => 'required|in_list[admin,pengelola]',
         ];
 
-        $pass = (string) $this->request->getPost('password');
-        if ($pass !== '') {
-            $data['password_hash'] = password_hash($pass, PASSWORD_DEFAULT);
+        if ($id === 0) {
+            $rules['username'] = 'required|is_unique[users.username]|min_length[3]';
+            $rules['password'] = 'required|min_length[6]';
+        } else {
+            $rules['username'] = "required|is_unique[users.username,id,{$id}]|min_length[3]";
         }
 
-        if ($data['username'] === '' || $data['nama'] === '') {
-            return redirect()->back()->withInput()->with('error', 'Username dan nama wajib diisi.');
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'nama'     => $nama,
+            'username' => $username,
+            'role'     => $role,
+        ];
+
+        if ($password !== '') {
+            $data['password'] = password_hash($password, PASSWORD_BCRYPT);
         }
 
         if ($id > 0) {
-            $user->update($id, $data);
-            $msg = 'Pengguna berhasil diperbarui.';
-        } else {
-            if ($pass === '') {
-                return redirect()->back()->withInput()->with('error', 'Password wajib untuk pengguna baru.');
-            }
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $user->insert($data);
-            $msg = 'Pengguna baru berhasil ditambahkan.';
+            $this->userModel->update($id, $data);
+            return redirect()->to('/user')->with('sukses', 'Data pengguna berhasil diperbarui.');
         }
 
-        return redirect()->to('/user')->with('sukses', $msg);
+        $this->userModel->insert($data);
+        return redirect()->to('/user')->with('sukses', 'Pengguna baru berhasil ditambahkan.');
     }
 
     public function delete(int $id)
     {
-        $user = new UserModel();
-
-        // Cegah hapus diri sendiri
-        if ($id === (int) session('user_id')) {
-            return redirect()->to('/user')->with('error', 'Tidak bisa menghapus akun yang sedang digunakan.');
+        if ($id === (int) session()->get('user_id')) {
+            return redirect()->to('/user')->with('error', 'Tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
-        $user->delete($id);
-
+        $this->userModel->delete($id);
         return redirect()->to('/user')->with('sukses', 'Pengguna berhasil dihapus.');
     }
 }

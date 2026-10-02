@@ -1,44 +1,49 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
-        <h5 class="mb-0 fw-bold">Kategori Barang</h5>
-        <small class="text-muted">Kelola pengelompokan produk</small>
+        <h4 class="mb-0 fw-bold">Kategori Inventaris</h4>
+        <small class="text-muted">Kelompokkan barang agar inventaris tertata rapi dan mudah dicari</small>
     </div>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalKategori" onclick="resetForm()">
+    <button class="btn btn-primary btn-sm" onclick="bukaModalKategori()">
         <i class="bi bi-plus-lg me-1"></i> Tambah Kategori
     </button>
 </div>
 
+<!-- Table Card -->
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th style="width:100px">Kode</th>
+                    <th style="width:70px">ID</th>
                     <th>Nama Kategori</th>
                     <th>Keterangan</th>
-                    <th class="text-end" style="width:120px">Jml Barang</th>
                     <th class="text-end" style="width:120px">Aksi</th>
                 </tr>
             </thead>
             <tbody>
             <?php if (empty($kategori)): ?>
-                <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada data kategori.</td></tr>
+                <tr><td colspan="4" class="text-center py-4 text-muted">Belum ada kategori.</td></tr>
             <?php else: ?>
                 <?php foreach ($kategori as $k): ?>
                 <tr>
-                    <td><code><?= esc($k['kode']) ?></code></td>
-                    <td class="fw-semibold"><?= esc($k['nama']) ?></td>
-                    <td class="text-muted small"><?= esc($k['keterangan'] ?? '-') ?></td>
-                    <td class="text-end"><span class="badge badge-soft-info"><?= (int) $k['jumlah_barang'] ?></span></td>
+                    <td class="font-monospace text-muted"><?= (int) $k['id'] ?></td>
+                    <td><strong class="text-primary"><?= esc($k['nama']) ?></strong></td>
+                    <td><?= esc($k['keterangan'] ?: '-') ?></td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-secondary" onclick='editKategori(<?= json_encode($k) ?>)'><i class="bi bi-pencil"></i></button>
-                        <form action="/kategori/delete/<?= (int) $k['id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Hapus kategori ini?')">
-                            <?= csrf_field() ?>
-                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                        </form>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick='editKategori(<?= json_encode($k) ?>)' title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <?php if (session()->get('user_role') === 'admin'): ?>
+                            <form action="/kategori/delete/<?= (int) $k['id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Hapus kategori ini?')">
+                                <?= csrf_field() ?>
+                                <button class="btn btn-outline-danger" title="Hapus"><i class="bi bi-trash"></i></button>
+                            </form>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -48,33 +53,29 @@
     </div>
 </div>
 
-<!-- Modal Form Kategori -->
+<!-- Modal Kategori -->
 <div class="modal fade" id="modalKategori" tabindex="-1">
     <div class="modal-dialog">
-        <form class="modal-content" method="POST" action="/kategori/save">
+        <form class="modal-content" method="POST" action="/kategori/save" id="formKategori">
             <?= csrf_field() ?>
-            <input type="hidden" name="id" id="katId">
+            <input type="hidden" name="id" id="katId" value="0">
             <div class="modal-header">
-                <h6 class="modal-title fw-bold" id="modalTitle">Tambah Kategori</h6>
+                <h6 class="modal-title fw-bold" id="modalKatTitle">Tambah Kategori Baru</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Kode Kategori</label>
-                    <input type="text" name="kode" id="katKode" class="form-control" required placeholder="Contoh: HP, LAPTOP">
+                    <label class="form-label small fw-semibold">Nama Kategori <span class="text-danger">*</span></label>
+                    <input type="text" name="nama" id="katNama" class="form-control" placeholder="Contoh: Smartphone & Tablet" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Nama Kategori</label>
-                    <input type="text" name="nama" id="katNama" class="form-control" required placeholder="Contoh: Handphone">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Keterangan (opsional)</label>
-                    <textarea name="keterangan" id="katKet" class="form-control" rows="2"></textarea>
+                    <label class="form-label small fw-semibold">Keterangan Singkat</label>
+                    <textarea name="keterangan" id="katKeterangan" class="form-control" rows="2" placeholder="Deskripsi kelompok barang..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-sm btn-primary">Simpan Kategori</button>
             </div>
         </form>
     </div>
@@ -84,19 +85,19 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function resetForm() {
-    document.getElementById('modalTitle').innerText = 'Tambah Kategori';
-    document.getElementById('katId').value = '';
-    document.getElementById('katKode').value = '';
+function bukaModalKategori() {
+    document.getElementById('katId').value = 0;
     document.getElementById('katNama').value = '';
-    document.getElementById('katKet').value = '';
+    document.getElementById('katKeterangan').value = '';
+    document.getElementById('modalKatTitle').innerText = 'Tambah Kategori Baru';
+    new bootstrap.Modal(document.getElementById('modalKategori')).show();
 }
-function editKategori(data) {
-    document.getElementById('modalTitle').innerText = 'Edit Kategori';
-    document.getElementById('katId').value = data.id;
-    document.getElementById('katKode').value = data.kode;
-    document.getElementById('katNama').value = data.nama;
-    document.getElementById('katKet').value = data.keterangan || '';
+
+function editKategori(k) {
+    document.getElementById('katId').value = k.id;
+    document.getElementById('katNama').value = k.nama;
+    document.getElementById('katKeterangan').value = k.keterangan || '';
+    document.getElementById('modalKatTitle').innerText = 'Edit Kategori: ' + k.nama;
     new bootstrap.Modal(document.getElementById('modalKategori')).show();
 }
 </script>

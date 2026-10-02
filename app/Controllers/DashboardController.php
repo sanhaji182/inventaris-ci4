@@ -3,120 +3,68 @@
 namespace App\Controllers;
 
 use App\Models\BarangModel;
-use App\Models\PembelianModel;
-use App\Models\PenjualanModel;
-use App\Models\UnitModel;
-use App\Models\UtangModel;
+use App\Models\KategoriModel;
+use App\Models\RiwayatStokModel;
 
 class DashboardController extends BaseController
 {
     public function index()
     {
-        $unit    = new UnitModel();
-        $utang   = new UtangModel();
+        $db = \Config\Database::connect();
 
-        // ---- Kartu ringkasan (bulan ini) ----
-        $awalBulan  = date('Y-m-01');
-        $penjualan  = new PenjualanModel();
+        // 1. Ringkasan Aset & Stok
+        $totalBarang = $db->table('barang')->countAllResults();
+        $totalStok = (int) ($db->table('barang')->selectSum('stok')->get()->getRow()->stok ?? 0);
 
-        $bulanIni = $penjualan->db->table('penjualan')
-            ->select('COUNT(*) AS trx, COALESCE(SUM(total),0) AS omzet')
-            ->where('tanggal >=', $awalBulan)
-            ->get()->getRowArray();
+        // Valuasi total modal (aset) & potensi omzet jika terjual semua
+        $valuasi = $db->table('barang')
+            ->select('SUM(stok * harga_beli) AS total_modal, SUM(stok * harga_jual) AS potensi_omzet')
+            ->get()
+            ->getRow();
+        $totalModal = (float) ($valuasi->total_modal ?? 0);
+        $potensiOmzet = (float) ($valuasi->potensi_omzet ?? 0);
+        $potensiLaba = $potensiOmzet - $totalModal;
 
-        $labaBulanIni = $penjualan->db->table('penjualan_unit')
-            ->select('COALESCE(SUM(penjualan_unit.laba),0) AS laba')
-            ->join('penjualan', 'penjualan.id = penjualan_unit.penjualan_id')
-            ->where('penjualan.tanggal >=', $awalBulan)
-            ->get()->getRowArray();
+        // 2. Realisasi Keuntungan dari Barang Keluar/Terjual
+        $realisasiLaba = (float) ($db->table('riwayat_stok')
+            ->where('jenis', 'keluar')
+            ->selectSum('total_laba')
+            ->get()
+            ->getRow()->total_laba ?? 0);
 
-        // ---- Nilai stok + alert stok minimum ----
-        $stok = $unit->db->table('unit')
-            ->select('status, COUNT(*) AS jml, COALESCE(SUM(harga_beli),0) AS nilai')
-            ->groupBy('status')->get()->getResultArray();
+        $totalItemTerjual = (int) ($db->table('riwayat_stok')
+            ->where('jenis', 'keluar')
+            ->selectSum('jumlah')
+            ->get()
+            ->getRow()->jumlah ?? 0);
 
-        $stokMap = [];
-        foreach ($stok as $s) {
-            $stokMap[$s['status']] = $s;
-        }
+        // 3. Stok Menipis (<= 2 unit)
+        $stokMenipis = $db->table('barang')
+            ->select('barang.*, kategori.nama AS kategori_nama')
+            ->join('kategori', 'kategori.id = barang.kategori_id', 'left')
+            ->where('stok <=', 2)
+            ->orderBy('stok', 'ASC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
 
-        $stokAlert = (new BarangModel())->db->table('barang')
-            ->select('barang.kode, barang.nama, barang.stok_min,
-                      COALESCE(SUM(CASE WHEN unit.status = "tersedia" THEN 1 ELSE 0 END), 0) AS tersedia')
-            ->join('unit', 'unit.barang_id = barang.id', 'left')
-            ->groupBy('barang.id')
-            ->having('tersedia <= barang.stok_min', null, false)
-            ->orderBy('barang.nama')
-            ->get()->getResultArray();
+        // 4. Riwayat Transaksi Terakhir
+        $riwayatModel = new RiwayatStokModel();
+        $riwayatTerakhir = $riwayatModel->getRiwayatLengkap(6);
 
-        // ---- Utang ----
-        $utangRingkas = $utang->db->table('utang')
-            ->select('COUNT(*) AS jml, COALESCE(SUM(nominal-terbayar),0) AS sisa')
-            ->where('status', 'belum')->get()->getRowArray();
+        $data = [
+            'title'            => 'Dashboard Inventaris',
+            'totalBarang'      => $totalBarang,
+            'totalStok'        => $totalStok,
+            'totalModal'       => $totalModal,
+            'potensiOmzet'     => $potensiOmzet,
+            'potensiLaba'      => $potensiLaba,
+            'realisasiLaba'    => $realisasiLaba,
+            'totalItemTerjual' => $totalItemTerjual,
+            'stokMenipis'      => $stokMenipis,
+            'riwayatTerakhir'  => $riwayatTerakhir,
+        ];
 
-        $aging = $utang->aging();
-
-        // ---- Tren 14 hari (omzet & laba) ----
-        $trenPenjualan = $penjualan->db->table('penjualan')
-            ->select("tanggal, SUM(total) AS omzet")
-            ->where('tanggal >=', date('Y-m-d', strtotime('-13 days')))
-            ->groupBy('tanggal')->get()->getResultArray();
-
-        $trenLaba = $penjualan->db->table('penjualan_unit')
-            ->select('penjualan.tanggal, SUM(penjualan_unit.laba) AS laba')
-            ->join('penjualan', 'penjualan.id = penjualan_unit.penjualan_id')
-            ->where('penjualan.tanggal >=', date('Y-m-d', strtotime('-13 days')))
-            ->groupBy('penjualan.tanggal')->get()->getResultArray();
-
-        $tren = [];
-        for ($i = 13; $i >= 0; $i--) {
-            $t = date('Y-m-d', strtotime("-{$i} days"));
-            $tren[$t] = ['omzet' => 0.0, 'laba' => 0.0];
-        }
-        foreach ($trenPenjualan as $r) {
-            $tren[$r['tanggal']]['omzet'] = (float) $r['omzet'];
-        }
-        foreach ($trenLaba as $r) {
-            $tren[$r['tanggal']]['laba'] = (float) $r['laba'];
-        }
-
-        // ---- Transaksi terbaru ----
-        $terakhirPenjualan = $penjualan->db->table('penjualan')
-            ->select('penjualan.*, users.nama AS user_nama')
-            ->join('users', 'users.id = penjualan.user_id', 'left')
-            ->orderBy('penjualan.id', 'DESC')->limit(5)->get()->getResultArray();
-
-        $terakhirUtang = $utang->db->table('utang')
-            ->select('utang.*, supplier.nama AS supplier_nama,
-                      DATEDIFF(CURDATE(), utang.jatuh_tempo) AS hari_telat')
-            ->join('supplier', 'supplier.id = utang.supplier_id', 'left')
-            ->where('utang.status', 'belum')
-            ->orderBy('utang.jatuh_tempo', 'ASC')->limit(5)->get()->getResultArray();
-
-        return view('dashboard/index', [
-            'title'          => 'Dashboard',
-            'bulanIni'       => $bulanIni,
-            'labaBulanIni'   => $labaBulanIni['laba'],
-            'stokMap'        => $stokMap,
-            'stokAlert'      => $stokAlert,
-            'utangRingkas'   => $utangRingkas,
-            'aging'          => $aging,
-            'tren'           => $tren,
-            'terakhirPenjualan' => $terakhirPenjualan,
-            'terakhirUtang'     => $terakhirUtang,
-        ]);
-    }
-
-    /** JSON untuk chart (dipanggil AJAX). */
-    public function chartData()
-    {
-        $penjualan = new PenjualanModel();
-
-        $rows = $penjualan->db->table('penjualan')
-            ->select('tanggal, SUM(total) AS omzet')
-            ->where('tanggal >=', date('Y-m-d', strtotime('-29 days')))
-            ->groupBy('tanggal')->get()->getResultArray();
-
-        return $this->response->setJSON($rows);
+        return view('dashboard/index', $data);
     }
 }

@@ -4,117 +4,144 @@ namespace App\Controllers;
 
 use App\Models\BarangModel;
 use App\Models\KategoriModel;
+use App\Models\RiwayatStokModel;
 
 class BarangController extends BaseController
 {
+    protected BarangModel $barangModel;
+    protected KategoriModel $kategoriModel;
+
+    public function __construct()
+    {
+        $this->barangModel = new BarangModel();
+        $this->kategoriModel = new KategoriModel();
+    }
+
     public function index()
     {
-        $barang   = new BarangModel();
-        $kategori = new KategoriModel();
+        $cari = trim((string) $this->request->getGet('cari'));
+        $kategoriId = (int) $this->request->getGet('kategori');
 
-        $cari = (string) $this->request->getGet('cari');
-        $kat  = (int) $this->request->getGet('kategori');
+        $builder = $this->barangModel->db->table('barang')
+            ->select('barang.*, kategori.nama AS kategori_nama')
+            ->join('kategori', 'kategori.id = barang.kategori_id', 'left');
+
+        if ($cari !== '') {
+            $builder->groupStart()
+                ->like('barang.nama_barang', $cari)
+                ->orLike('barang.kode_barang', $cari)
+                ->orLike('barang.sumber_toko', $cari)
+                ->orLike('barang.minus_kondisi', $cari)
+                ->groupEnd();
+        }
+
+        if ($kategoriId > 0) {
+            $builder->where('barang.kategori_id', $kategoriId);
+        }
+
+        $barang = $builder->orderBy('barang.id', 'DESC')->get()->getResultArray();
+        $kategori = $this->kategoriModel->orderBy('nama', 'ASC')->findAll();
 
         return view('barang/index', [
-            'title'    => 'Katalog Barang',
-            'barang'   => $barang->withStok($cari ?: null, $kat ?: null),
-            'kategori' => $kategori->findAll(),
-            'cari'     => $cari,
-            'katPilih' => $kat,
+            'title'      => 'Katalog Inventaris Barang',
+            'barang'     => $barang,
+            'kategori'   => $kategori,
+            'cari'       => $cari,
+            'kategoriId' => $kategoriId,
         ]);
     }
 
-    public function form(int $id = 0)
+    public function form(?int $id = null)
     {
-        $barang   = new BarangModel();
-        $kategori = new KategoriModel();
+        $barang = null;
+        if ($id) {
+            $barang = $this->barangModel->find($id);
+            if (! $barang) {
+                return redirect()->to('/barang')->with('error', 'Barang tidak ditemukan.');
+            }
+        }
 
-        $row = $id > 0 ? $barang->find($id) : null;
+        $kodeOtomatis = $barang ? $barang['kode_barang'] : $this->barangModel->kodeBerikutnya();
+        $kategori = $this->kategoriModel->orderBy('nama', 'ASC')->findAll();
 
         return view('barang/form', [
-            'title'    => $id > 0 ? 'Edit Barang' : 'Tambah Barang',
-            'barang'   => $row,
-            'kategori' => $kategori->findAll(),
-            'nextKode' => $row ? $row['kode'] : $barang->kodeBerikutnya(),
+            'title'        => $barang ? 'Edit Data Barang' : 'Tambah Barang Baru',
+            'barang'       => $barang,
+            'kodeOtomatis' => $kodeOtomatis,
+            'kategori'     => $kategori,
         ]);
     }
 
     public function save()
     {
-        $barang = new BarangModel();
-        $id     = (int) $this->request->getPost('id');
+        $id = (int) $this->request->getPost('id');
+        $isNew = ($id === 0);
 
-        $data = [
-            'kode'        => strtoupper(trim((string) $this->request->getPost('kode'))),
-            'nama'        => trim((string) $this->request->getPost('nama')),
-            'kategori_id' => (int) $this->request->getPost('kategori_id'),
-            'merek'       => trim((string) $this->request->getPost('merek')) ?: null,
-            'spek'        => trim((string) $this->request->getPost('spek')) ?: null,
-            'harga_jual'  => (float) str_replace(['.', ','], ['', '.'], (string) $this->request->getPost('harga_jual')),
-            'stok_min'    => (int) $this->request->getPost('stok_min'),
+        $rules = [
+            'nama_barang' => 'required|min_length[3]|max_length[150]',
+            'kategori_id' => 'required|is_not_unique[kategori.id]',
+            'harga_beli'  => 'required|numeric|greater_than_equal_to[0]',
+            'harga_jual'  => 'required|numeric|greater_than_equal_to[0]',
+            'stok'        => 'required|integer|greater_than_equal_to[0]',
+            'satuan'      => 'required|max_length[30]',
         ];
 
-        if ($data['kode'] === '' || $data['nama'] === '' || ! $data['kategori_id']) {
-            return redirect()->back()->withInput()->with('error', 'Kode, nama, dan kategori wajib diisi.');
-        }
-
-        // Upload foto opsional
-        $foto = $this->request->getFile('foto');
-        if ($foto && $foto->isValid() && ! $foto->hasMoved()) {
-            $namaBaru = $foto->getRandomName();
-            $foto->move(ROOTPATH . 'public/uploads/barang', $namaBaru);
-            $data['foto'] = $namaBaru;
-        }
-
-        if ($id > 0) {
-            $barang->update($id, $data);
-            $msg = 'Barang berhasil diperbarui.';
+        if ($isNew) {
+            $rules['kode_barang'] = 'required|is_unique[barang.kode_barang]';
         } else {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $barang->insert($data);
-            $msg = 'Barang berhasil ditambahkan ke katalog.';
+            $rules['kode_barang'] = "required|is_unique[barang.kode_barang,id,{$id}]";
         }
 
-        return redirect()->to('/barang')->with('sukses', $msg);
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = [
+            'kode_barang'    => trim((string) $this->request->getPost('kode_barang')),
+            'nama_barang'    => trim((string) $this->request->getPost('nama_barang')),
+            'kategori_id'    => (int) $this->request->getPost('kategori_id'),
+            'stok'           => (int) $this->request->getPost('stok'),
+            'satuan'         => trim((string) $this->request->getPost('satuan')),
+            'harga_beli'     => (float) $this->request->getPost('harga_beli'),
+            'harga_jual'     => (float) $this->request->getPost('harga_jual'),
+            'link_pembelian' => trim((string) $this->request->getPost('link_pembelian')),
+            'sumber_toko'    => trim((string) $this->request->getPost('sumber_toko')),
+            'minus_kondisi'  => trim((string) $this->request->getPost('minus_kondisi')),
+            'catatan'        => trim((string) $this->request->getPost('catatan')),
+        ];
+
+        if ($isNew) {
+            $newId = $this->barangModel->insert($data);
+            // Catat ke riwayat stok awal
+            if ($data['stok'] > 0) {
+                $riwayatModel = new RiwayatStokModel();
+                $riwayatModel->insert([
+                    'barang_id'       => $newId,
+                    'user_id'         => (int) session()->get('user_id'),
+                    'jenis'           => 'masuk',
+                    'jumlah'          => $data['stok'],
+                    'harga_transaksi' => $data['harga_beli'],
+                    'total_laba'      => 0,
+                    'keterangan'      => 'Saldo stok awal barang baru',
+                    'tanggal'         => date('Y-m-d'),
+                    'created_at'      => date('Y-m-d H:i:s'),
+                ]);
+            }
+            return redirect()->to('/barang')->with('sukses', 'Barang baru berhasil ditambahkan.');
+        }
+
+        $this->barangModel->update($id, $data);
+        return redirect()->to('/barang')->with('sukses', 'Data barang berhasil diperbarui.');
     }
 
     public function delete(int $id)
     {
-        $barang = new BarangModel();
-
-        // Validasi: tidak boleh hapus bila ada unit fisik yang pernah terdaftar
-        $unitCount = $barang->db->table('unit')->where('barang_id', $id)->countAllResults();
-        if ($unitCount > 0) {
-            return redirect()->to('/barang')->with('error', "Barang tidak bisa dihapus: masih tercatat {$unitCount} unit fisik.");
-        }
-
-        $barang->delete($id);
-
-        return redirect()->to('/barang')->with('sukses', 'Barang berhasil dihapus.');
-    }
-
-    /** Riwayat unit fisik dari barang ini. */
-    public function riwayat(int $id)
-    {
-        $barang = (new BarangModel())->findWithDetail($id);
-        if ($barang === null) {
+        $barang = $this->barangModel->find($id);
+        if (! $barang) {
             return redirect()->to('/barang')->with('error', 'Barang tidak ditemukan.');
         }
 
-        $units = (new BarangModel())->db->table('unit')
-            ->select('unit.*, supplier.nama AS supplier_nama, penjualan.no AS penjualan_no,
-                      penjualan_unit.harga_jual AS jual_aktual, penjualan_unit.laba')
-            ->join('supplier', 'supplier.id = unit.supplier_id', 'left')
-            ->join('penjualan_unit', 'penjualan_unit.unit_id = unit.id', 'left')
-            ->join('penjualan', 'penjualan.id = penjualan_unit.penjualan_id', 'left')
-            ->where('unit.barang_id', $id)
-            ->orderBy('unit.tanggal_masuk', 'DESC')
-            ->get()->getResultArray();
-
-        return view('barang/riwayat', [
-            'title'  => 'Riwayat Unit · ' . $barang['nama'],
-            'barang' => $barang,
-            'units'  => $units,
-        ]);
+        $this->barangModel->delete($id);
+        return redirect()->to('/barang')->with('sukses', 'Barang berhasil dihapus.');
     }
 }

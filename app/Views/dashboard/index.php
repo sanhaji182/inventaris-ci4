@@ -3,468 +3,183 @@
 
 <!-- Bento Stat Grid -->
 <div class="row g-3 mb-4">
-    <!-- Omzet -->
+    <!-- Total Barang -->
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card h-100 p-3 p-xl-4">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="label">Omzet Bulan Ini</span>
-                <div class="icon-box primary">
+        <div class="stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="label text-muted small fw-semibold text-uppercase">Total Item Katalog</span>
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-boxes"></i>
+                </div>
+            </div>
+            <div class="value fs-4 fw-bold mb-1"><?= (int) $totalBarang ?> <span class="fs-6 fw-normal text-muted">Model</span></div>
+            <div class="trend small text-muted">
+                Total fisik: <strong><?= (int) $totalStok ?> unit</strong> siap pakai
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Valuasi Modal (Harga Beli) -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="label text-muted small fw-semibold text-uppercase">Total Modal (Harga Beli)</span>
+                <div class="stat-icon bg-info-subtle text-info">
                     <i class="bi bi-wallet2"></i>
                 </div>
             </div>
-            <div class="value"><?= rupiah($bulanIni['omzet']) ?></div>
-            <div class="sub-label">
-                <span class="text-success fw-semibold"><i class="bi bi-arrow-up-right me-1"></i><?= (int) $bulanIni['trx'] ?> Transaksi</span>
-                <span>tercatat</span>
+            <div class="value fs-4 fw-bold font-monospace mb-1 text-primary"><?= rupiah($totalModal) ?></div>
+            <div class="trend small text-muted">
+                Nilai aset inventaris saat ini
             </div>
         </div>
     </div>
 
-    <!-- Laba Kotor -->
+    <!-- Potensi Omzet & Estimasi Laba -->
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card h-100 p-3 p-xl-4">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="label">Laba Kotor Riil</span>
-                <div class="icon-box success">
+        <div class="stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="label text-muted small fw-semibold text-uppercase">Potensi Untung Stok</span>
+                <div class="stat-icon bg-success-subtle text-success">
                     <i class="bi bi-graph-up-arrow"></i>
                 </div>
             </div>
-            <div class="value <?= $labaBulanIni >= 0 ? 'text-success' : 'text-danger' ?>">
-                <?= rupiah($labaBulanIni) ?>
-            </div>
-            <div class="sub-label">
-                <span class="text-muted">Margin riil dari selisih modal per unit</span>
+            <div class="value fs-4 fw-bold font-monospace mb-1 text-success"><?= rupiah($potensiLaba) ?></div>
+            <div class="trend small text-muted">
+                Jika seluruh <?= (int) $totalStok ?> stok habis terjual
             </div>
         </div>
     </div>
 
-    <!-- Unit Tersedia -->
+    <!-- Realisasi Laba Terkumpul -->
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card h-100 p-3 p-xl-4">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="label">Stok Fisik Tersedia</span>
-                <div class="icon-box info">
-                    <i class="bi bi-phone"></i>
+        <div class="stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="label text-muted small fw-semibold text-uppercase">Untung Bersih Masuk</span>
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-cash-stack"></i>
                 </div>
             </div>
-            <div class="value"><?= (int) ($stokMap['tersedia']['jml'] ?? 0) ?> <span class="fs-6 fw-normal text-muted">unit</span></div>
-            <div class="sub-label">
-                <span class="text-muted">Aset modal: <strong><?= rupiah($stokMap['tersedia']['nilai'] ?? 0) ?></strong></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Utang Dagang -->
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card h-100 p-3 p-xl-4">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="label">Utang Belum Lunas</span>
-                <div class="icon-box danger">
-                    <i class="bi bi-credit-card-2-front"></i>
-                </div>
-            </div>
-            <div class="value text-danger"><?= rupiah($utangRingkas['sisa']) ?></div>
-            <div class="sub-label">
-                <span class="badge-dot badge-soft-danger"><?= (int) $utangRingkas['jml'] ?> Faktur Aktif</span>
+            <div class="value fs-4 fw-bold font-monospace mb-1 text-dark"><?= rupiah($realisasiLaba) ?></div>
+            <div class="trend small text-muted">
+                Dari <strong><?= (int) $totalItemTerjual ?> unit</strong> barang keluar
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart & Aging Grid -->
-<div class="row g-3 mb-4">
-    <!-- Chart Interaktif -->
+<div class="row g-3">
+    <!-- Kolom Kiri: Riwayat Transaksi Keluar-Masuk & Laba -->
     <div class="col-lg-8">
         <div class="card h-100">
-            <div class="card-header">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-activity text-primary fs-5"></i>
-                    <div>
-                        <div class="fw-bold">Tren Penjualan & Laba Riil</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Perbandingan arus kas omzet terhadap margin kotor harian</div>
-                    </div>
+                    <i class="bi bi-clock-history text-primary fs-5"></i>
+                    <span class="fw-bold">Aktivitas Keluar / Masuk Terakhir</span>
                 </div>
-                <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-outline-secondary active" id="btnRange14">14 Hari</button>
-                    <button type="button" class="btn btn-outline-secondary" id="btnRange7">7 Hari</button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div style="height: 280px; position: relative;">
-                    <canvas id="chartTren"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Aging Utang Analysis -->
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-hourglass-split text-warning fs-5"></i>
-                    <div>
-                        <div class="fw-bold">Analisis Umur Utang (Aging)</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Kategori keterlambatan pembayaran termin</div>
-                    </div>
-                </div>
+                <a href="/stok" class="btn btn-sm btn-outline-primary">Catat / Lihat Semua →</a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
-                            <th>Bucket</th>
-                            <th class="text-center">Jml</th>
-                            <th class="text-end">Nominal</th>
+                            <th>Waktu & Barang</th>
+                            <th class="text-center">Jenis</th>
+                            <th class="text-center">Jumlah</th>
+                            <th class="text-end">Harga Transaksi</th>
+                            <th class="text-end">Untung / Rugi</th>
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($aging as $a): ?>
+                    <?php if (empty($riwayatTerakhir)): ?>
+                        <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada riwayat keluar/masuk stok.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($riwayatTerakhir as $r): ?>
                         <tr>
                             <td>
-                                <span class="badge-dot badge-soft-<?= esc($a['warna']) ?>">
-                                    <?= esc($a['label']) ?>
-                                </span>
+                                <div class="fw-bold small"><?= esc($r['nama_barang']) ?></div>
+                                <div class="text-muted" style="font-size:0.75rem;">
+                                    <span class="font-monospace"><?= esc($r['kode_barang']) ?></span> · <?= esc($r['tanggal']) ?>
+                                    <?php if (! empty($r['keterangan'])): ?>
+                                        (<?= esc($r['keterangan']) ?>)
+                                    <?php endif; ?>
+                                </div>
                             </td>
-                            <td class="text-center fw-semibold"><?= (int) $a['jumlah'] ?></td>
-                            <td class="text-end font-monospace fw-semibold"><?= rupiah($a['total']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <span class="small text-muted">Jatuh tempo terdekat diprioritaskan</span>
-                <a href="/utang" class="btn btn-sm btn-link text-decoration-none p-0">Kelola Utang &rarr;</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Aktivitas Terkini Section -->
-<div class="row g-3">
-    <!-- Penjualan Terakhir -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="table-filter-bar">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-bag-check text-success fs-5"></i>
-                    <span class="fw-bold">Penjualan Terakhir</span>
-                </div>
-                <div class="table-search-input">
-                    <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Filter penjualan..." data-table-search="#tablePenjualan">
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle" id="tablePenjualan">
-                    <thead>
-                        <tr>
-                            <th>No Faktur</th>
-                            <th>Tanggal</th>
-                            <th class="text-end">Total</th>
-                            <th>Kasir</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($terakhirPenjualan as $t): ?>
-                        <tr>
-                            <td>
-                                <a href="/penjualan/detail/<?= (int) $t['id'] ?>" class="chip-imei" title="Lihat Faktur">
-                                    <i class="bi bi-receipt"></i>
-                                    <span><?= esc($t['no']) ?></span>
-                                </a>
-                            </td>
-                            <td><span class="small text-muted"><?= esc($t['tanggal']) ?></span></td>
-                            <td class="text-end font-monospace fw-bold text-success"><?= rupiah($t['total']) ?></td>
-                            <td>
-                                <span class="badge badge-soft-secondary">
-                                    <i class="bi bi-person me-1"></i><?= esc($t['user_nama'] ?? '-') ?>
-                                </span>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <span class="small text-muted">Menampilkan transaksi kasir terbaru</span>
-                <a href="/penjualan" class="btn btn-sm btn-outline-secondary">Semua Transaksi</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Utang Jatuh Tempo -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="table-filter-bar">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-exclamation-circle text-danger fs-5"></i>
-                    <span class="fw-bold">Jatuh Tempo Terdekat</span>
-                </div>
-                <div class="table-search-input">
-                    <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Filter supplier..." data-table-search="#tableUtang">
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle" id="tableUtang">
-                    <thead>
-                        <tr>
-                            <th>Kode</th>
-                            <th>Supplier</th>
-                            <th>Jatuh Tempo</th>
-                            <th class="text-end">Sisa Bayar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($terakhirUtang as $u): ?>
-                        <tr>
-                            <td>
-                                <a href="/utang/detail/<?= (int) $u['id'] ?>" class="chip-imei">
-                                    <i class="bi bi-hash"></i>
-                                    <span><?= esc($u['kode']) ?></span>
-                                </a>
-                            </td>
-                            <td><span class="fw-semibold small"><?= esc($u['supplier_nama'] ?? '-') ?></span></td>
-                            <td>
-                                <div class="small fw-semibold"><?= esc($u['jatuh_tempo']) ?></div>
-                                <?php if ($u['jatuh_tempo'] < date('Y-m-d')): ?>
-                                    <span class="badge-dot badge-soft-danger pulse" style="font-size:0.7rem;">
-                                        Telat <?= (int) $u['hari_telat'] ?> hari
-                                    </span>
+                            <td class="text-center">
+                                <?php if ($r['jenis'] === 'masuk'): ?>
+                                    <span class="badge badge-soft-info"><i class="bi bi-arrow-down-left"></i> Masuk</span>
+                                <?php elseif ($r['jenis'] === 'keluar'): ?>
+                                    <span class="badge badge-soft-success"><i class="bi bi-arrow-up-right"></i> Keluar</span>
                                 <?php else: ?>
-                                    <span class="badge-dot badge-soft-info" style="font-size:0.7rem;">
-                                        Sisa <?= abs((int) $u['hari_telat']) ?> hari
-                                    </span>
+                                    <span class="badge badge-soft-secondary">Sesuaikan</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-end font-monospace fw-bold text-danger">
-                                <?= rupiah($u['nominal'] - $u['terbayar']) ?>
+                            <td class="text-center font-monospace fw-semibold"><?= (int) $r['jumlah'] ?></td>
+                            <td class="text-end font-monospace"><?= rupiah($r['harga_transaksi']) ?></td>
+                            <td class="text-end font-monospace fw-bold">
+                                <?php if ($r['jenis'] === 'keluar'): ?>
+                                    <?php if ((float) $r['total_laba'] >= 0): ?>
+                                        <span class="text-success">+<?= rupiah($r['total_laba']) ?></span>
+                                    <?php else: ?>
+                                        <span class="text-danger"><?= rupiah($r['total_laba']) ?></span>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <span class="small text-muted">Prioritas pelunasan supplier</span>
-                <a href="/utang" class="btn btn-sm btn-outline-secondary">Daftar Utang</a>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Peringatan Stok Menipis -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                    <span class="fw-bold">Perlu Kulak / Stok Menipis</span>
+                </div>
+            </div>
+            <div class="p-3">
+                <?php if (empty($stokMenipis)): ?>
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
+                        Semua stok barang dalam kondisi aman.
+                    </div>
+                <?php else: ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($stokMenipis as $sm): ?>
+                        <div class="list-group-item px-0 py-2 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small text-truncate" style="max-width: 180px;"><?= esc($sm['nama_barang']) ?></span>
+                                <span class="badge bg-danger rounded-pill"><?= (int) $sm['stok'] ?> unit</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center small text-muted">
+                                <span>Modal: <?= rupiah($sm['harga_beli']) ?></span>
+                                <?php if (! empty($sm['link_pembelian'])): ?>
+                                    <a href="<?= esc($sm['link_pembelian']) ?>" target="_blank" class="text-primary text-decoration-none">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i> Beli Lagi
+                                    </a>
+                                <?php elseif (! empty($sm['sumber_toko'])): ?>
+                                    <span class="text-truncate" style="max-width:120px;"><?= esc($sm['sumber_toko']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="mt-3 text-center">
+                    <a href="/barang" class="btn btn-sm btn-outline-secondary w-100">Buka Katalog Inventaris</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Alert Stok di Bawah Minimum -->
-<?php if ($stokAlert): ?>
-<div class="card mt-4 border-warning">
-    <div class="card-header bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-shield-exclamation fs-5"></i>
-            <span class="fw-bold">Peringatan Stok di Bawah Batas Minimum (Restock Alert)</span>
-        </div>
-        <span class="badge bg-warning text-dark"><?= count($stokAlert) ?> Barang</span>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Nama Barang</th>
-                    <th class="text-center">Stok Minimum</th>
-                    <th class="text-center">Sisa Tersedia</th>
-                    <th class="text-end">Tindakan</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($stokAlert as $s): ?>
-                <tr>
-                    <td><span class="chip-imei"><?= esc($s['kode']) ?></span></td>
-                    <td><strong><?= esc($s['nama']) ?></strong></td>
-                    <td class="text-center text-muted"><?= (int) $s['stok_min'] ?> unit</td>
-                    <td class="text-center">
-                        <span class="badge-dot badge-soft-danger pulse">
-                            <?= (int) $s['tersedia'] ?> unit
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <a href="/pembelian/form" class="btn btn-sm btn-primary">
-                            <i class="bi bi-cart-plus me-1"></i> Beli Stok
-                        </a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-<?php endif; ?>
-
-<?= $this->endSection() ?>
-
-<?= $this->section('scripts') ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const rawTren = <?= json_encode(array_map(fn($r) => [
-        'omzet' => (float) $r['omzet'],
-        'laba'  => (float) $r['laba'],
-    ], $tren)) ?>;
-    
-    const allDates = Object.keys(rawTren);
-    let activeRange = 14;
-
-    function getChartColors() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        return {
-            gridColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)',
-            textColor: isDark ? '#94a3b8' : '#64748b',
-            omzetLine: '#6366f1',
-            omzetGradTop: isDark ? 'rgba(99, 102, 241, 0.35)' : 'rgba(99, 102, 241, 0.18)',
-            labaLine: '#10b981',
-            labaGradTop: isDark ? 'rgba(16, 185, 129, 0.35)' : 'rgba(16, 185, 129, 0.18)',
-        };
-    }
-
-    const ctx = document.getElementById('chartTren').getContext('2d');
-    let chartInstance = null;
-
-    function renderChart() {
-        const colors = getChartColors();
-        const displayDates = allDates.slice(-activeRange);
-
-        const gradOmzet = ctx.createLinearGradient(0, 0, 0, 260);
-        gradOmzet.addColorStop(0, colors.omzetGradTop);
-        gradOmzet.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
-
-        const gradLaba = ctx.createLinearGradient(0, 0, 0, 260);
-        gradLaba.addColorStop(0, colors.labaGradTop);
-        gradLaba.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-        const config = {
-            type: 'line',
-            data: {
-                labels: displayDates.map(d => {
-                    const parts = d.split('-');
-                    return parts[2] + '/' + parts[1];
-                }),
-                datasets: [
-                    {
-                        label: 'Omzet Penjualan',
-                        data: displayDates.map(d => rawTren[d].omzet),
-                        borderColor: colors.omzetLine,
-                        backgroundColor: gradOmzet,
-                        borderWidth: 2.5,
-                        pointRadius: 3,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: colors.omzetLine,
-                        fill: true,
-                        tension: 0.35,
-                    },
-                    {
-                        label: 'Laba Kotor Riil',
-                        data: displayDates.map(d => rawTren[d].laba),
-                        borderColor: colors.labaLine,
-                        backgroundColor: gradLaba,
-                        borderWidth: 2.5,
-                        pointRadius: 3,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: colors.labaLine,
-                        fill: true,
-                        tension: 0.35,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: {
-                            color: colors.textColor,
-                            font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: 600 },
-                            usePointStyle: true,
-                            boxWidth: 8,
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1f293d' : '#0f172a',
-                        titleColor: '#f8fafc',
-                        bodyColor: '#e2e8f0',
-                        padding: 12,
-                        cornerRadius: 8,
-                        titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: 700 },
-                        bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) label += ': ';
-                                if (context.parsed.y !== null) {
-                                    label += 'Rp ' + context.parsed.y.toLocaleString('id-ID');
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: colors.textColor, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 } }
-                    },
-                    y: {
-                        grid: { color: colors.gridColor },
-                        ticks: {
-                            color: colors.textColor,
-                            font: { family: "'JetBrains Mono', monospace", size: 11 },
-                            callback: function(v) {
-                                if (v >= 1e6) return 'Rp ' + (v / 1e6).toFixed(1) + 'M';
-                                if (v >= 1e3) return 'Rp ' + (v / 1e3).toFixed(0) + 'k';
-                                return 'Rp ' + v;
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-        chartInstance = new Chart(ctx, config);
-    }
-
-    renderChart();
-
-    // Range Toggles
-    const btn14 = document.getElementById('btnRange14');
-    const btn7 = document.getElementById('btnRange7');
-
-    btn14?.addEventListener('click', () => {
-        activeRange = 14;
-        btn14.classList.add('active');
-        btn7.classList.remove('active');
-        renderChart();
-    });
-
-    btn7?.addEventListener('click', () => {
-        activeRange = 7;
-        btn7.classList.add('active');
-        btn14.classList.remove('active');
-        renderChart();
-    });
-
-    // Theme Change Re-render
-    window.addEventListener('themeChanged', () => {
-        renderChart();
-    });
-});
-</script>
 <?= $this->endSection() ?>

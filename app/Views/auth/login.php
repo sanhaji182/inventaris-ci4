@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk · Sistem Inventaris & Tracking Unit</title>
+    <title>Masuk · Sistem Inventaris BNSP</title>
     
-    <!-- Fonts & Bootstrap 5 -->
+    <!-- Google Fonts & Bootstrap 5 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -106,15 +106,15 @@
             background: #f1f5f9;
             border: 1px solid #e2e8f0;
             color: #475569;
-            font-size: 0.75rem;
-            padding: 0.35rem 0.65rem;
+            font-size: 0.78rem;
+            padding: 0.4rem 0.85rem;
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            font-weight: 500;
+            gap: 0.4rem;
+            font-weight: 600;
         }
         .quick-demo-pill:hover {
             background: #eef2ff;
@@ -141,7 +141,6 @@
             color: #fff;
         }
 
-        /* Ambient Glowing Background Elements */
         .glow-orb {
             position: absolute;
             border-radius: 50%;
@@ -178,7 +177,7 @@
                     <i class="bi bi-box-seam-fill"></i>
                 </div>
                 <h3 class="fw-bold mb-1" style="letter-spacing: -0.02em; color: #0f172a;">Sistem Inventaris</h3>
-                <p class="text-muted small mb-4">Platform Manajemen Stok, IMEI & Kasir Multi-Unit</p>
+                <p class="text-muted small mb-4">Pengelolaan Stok, Modal Beli & Margin Untung-Rugi (BNSP)</p>
             </div>
 
             <!-- Flash Alert -->
@@ -221,30 +220,27 @@
                     </div>
                 </div>
 
-                <!-- 1-Click Demo Pills -->
+                <!-- 1-Click Demo Pills (Admin & Pengelola) -->
                 <div class="mb-4">
-                    <label class="form-label small text-muted d-block mb-1" style="font-size:0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Pilih Akun Demo (1-Klik)</label>
-                    <div class="d-flex flex-wrap gap-1">
-                        <button type="button" class="quick-demo-pill" data-user="admin" data-pass="admin123">
-                            <i class="bi bi-shield-check text-primary"></i> Admin
+                    <label class="form-label small text-muted d-block mb-2" style="font-size:0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Masuk Cepat Demo (1-Klik):</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="quick-demo-pill flex-fill justify-content-center" data-user="admin" data-pass="admin123">
+                            <i class="bi bi-shield-check text-primary fs-6"></i> Admin
                         </button>
-                        <button type="button" class="quick-demo-pill" data-user="pembeli" data-pass="pembeli123">
-                            <i class="bi bi-shop text-success"></i> Kasir
-                        </button>
-                        <button type="button" class="quick-demo-pill" data-user="staf" data-pass="staf123">
-                            <i class="bi bi-boxes text-info"></i> Gudang
+                        <button type="button" class="quick-demo-pill flex-fill justify-content-center" data-user="pengelola" data-pass="pengelola123">
+                            <i class="bi bi-boxes text-info fs-6"></i> Pengelola
                         </button>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-login-gradient w-100">
-                    Masuk ke Dashboard <i class="bi bi-arrow-right ms-1"></i>
+                    Masuk ke Sistem <i class="bi bi-arrow-right ms-1"></i>
                 </button>
             </form>
 
             <div class="text-center mt-4 pt-2 border-top">
                 <small class="text-muted" style="font-size:0.75rem;">
-                    CodeIgniter 4 · Single Unit IMEI Tracking · MariaDB
+                    CodeIgniter 4 · Clean Light UI · Standar Asesmen BNSP
                 </small>
             </div>
         </div>

@@ -6,25 +6,22 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
-/**
- * Menolak request tanpa sesi login.
- */
 class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
         $session = session();
-
         if (! $session->get('logged_in')) {
-            // Simpan tujuan agar user kembali ke halaman yang dimaksud setelah login.
-            if ($request->getPath() !== 'login') {
-                $session->set('redirect_after_login', $request->getUri()->getPath());
-            }
-
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Silakan masuk terlebih dahulu untuk mengakses sistem.');
         }
 
-        return null;
+        // Cek argument role jika dispesifikasikan (misal role:admin)
+        if (! empty($arguments)) {
+            $userRole = $session->get('user_role');
+            if (! in_array($userRole, $arguments, true)) {
+                return redirect()->to('/dashboard')->with('error', 'Akses ditolak: menu ini khusus pengguna berwenang.');
+            }
+        }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)

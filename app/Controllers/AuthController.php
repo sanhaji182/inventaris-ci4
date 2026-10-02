@@ -8,50 +8,38 @@ class AuthController extends BaseController
 {
     public function login()
     {
-        if (session('logged_in')) {
+        if (session()->get('logged_in')) {
             return redirect()->to('/dashboard');
         }
-
         return view('auth/login');
     }
 
-    public function attemptLogin()
+    public function doLogin()
     {
-        $session   = session();
-        $username  = (string) $this->request->getPost('username');
-        $password  = (string) $this->request->getPost('password');
+        $username = trim((string) $this->request->getPost('username'));
+        $password = (string) $this->request->getPost('password');
 
-        if ($username === '' || $password === '') {
-            return redirect()->back()->with('error', 'Username dan password wajib diisi.');
+        $userModel = new UserModel();
+        $user = $userModel->where('username', $username)->first();
+
+        if (! $user || ! password_verify($password, $user['password'])) {
+            return redirect()->back()->withInput()->with('error', 'Username atau password tidak sesuai.');
         }
 
-        $user = (new UserModel())->attempt($username, $password);
-
-        if ($user === null) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Username atau password salah.');
-        }
-
-        $session->regenerate();
-        $session->set([
-            'logged_in' => true,
+        session()->set([
             'user_id'   => (int) $user['id'],
-            'username'  => $user['username'],
-            'nama'      => $user['nama'],
-            'role'      => $user['role'],
+            'user_nama' => $user['nama'],
+            'user_name' => $user['username'],
+            'user_role' => $user['role'],
+            'logged_in' => true,
         ]);
 
-        $target = $session->get('redirect_after_login') ?? '/dashboard';
-        $session->remove('redirect_after_login');
-
-        return redirect()->to($target)->with('sukses', 'Selamat datang, ' . $user['nama'] . '!');
+        return redirect()->to('/dashboard')->with('sukses', 'Selamat datang kembali, ' . esc($user['nama']) . '!');
     }
 
     public function logout()
     {
         session()->destroy();
-
-        return redirect()->to('/login')->with('sukses', 'Anda telah keluar.');
+        return redirect()->to('/login')->with('sukses', 'Anda telah berhasil keluar.');
     }
 }

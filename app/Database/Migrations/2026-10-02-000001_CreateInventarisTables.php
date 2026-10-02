@@ -8,190 +8,207 @@ class CreateInventarisTables extends Migration
 {
     public function up()
     {
+        // 1. Users (Admin & Pengelola)
         $this->forge->addField([
-            'id'            => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'username'      => ['type' => 'VARCHAR', 'constraint' => 50],
-            'password_hash' => ['type' => 'VARCHAR', 'constraint' => 255],
-            'nama'          => ['type' => 'VARCHAR', 'constraint' => 100],
-            'role'          => ['type' => 'VARCHAR', 'constraint' => 20, 'default' => 'staf'],
-            'status'        => ['type' => 'VARCHAR', 'constraint' => 10, 'default' => 'aktif'],
-            'created_at'    => ['type' => 'DATETIME', 'null' => true],
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'nama' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+            ],
+            'username' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'unique'     => true,
+            ],
+            'password' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+            ],
+            'role' => [
+                'type'       => 'ENUM',
+                'constraint' => ['admin', 'pengelola'],
+                'default'    => 'pengelola',
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('username');
         $this->forge->createTable('users', true);
 
-        // ---------- Master data ----------
+        // 2. Kategori Barang
         $this->forge->addField([
-            'id'         => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'kode'       => ['type' => 'VARCHAR', 'constraint' => 20],
-            'nama'       => ['type' => 'VARCHAR', 'constraint' => 100],
-            'keterangan' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'nama' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'unique'     => true,
+            ],
+            'keterangan' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('kode');
         $this->forge->createTable('kategori', true);
 
+        // 3. Barang Inventaris
         $this->forge->addField([
-            'id'      => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'kode'    => ['type' => 'VARCHAR', 'constraint' => 20],
-            'nama'    => ['type' => 'VARCHAR', 'constraint' => 100],
-            'alamat'  => ['type' => 'TEXT', 'null' => true],
-            'telepon' => ['type' => 'VARCHAR', 'constraint' => 30, 'null' => true],
-            'catatan' => ['type' => 'TEXT', 'null' => true],
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'kode_barang' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 30,
+                'unique'     => true,
+            ],
+            'nama_barang' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 150,
+            ],
+            'kategori_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
+            'stok' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'default'    => 0,
+            ],
+            'satuan' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 30,
+                'default'    => 'Unit',
+            ],
+            'harga_beli' => [
+                'type'       => 'DECIMAL',
+                'constraint' => '15,2',
+                'default'    => 0.00,
+            ],
+            'harga_jual' => [
+                'type'       => 'DECIMAL',
+                'constraint' => '15,2',
+                'default'    => 0.00,
+            ],
+            'link_pembelian' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+            ],
+            'sumber_toko' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => true,
+            ],
+            'minus_kondisi' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'catatan' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('kode');
-        $this->forge->createTable('supplier', true);
-
-        // barang = katalog/tipe. Stok TIDAK disimpan di sini (lihat tabel unit).
-        $this->forge->addField([
-            'id'          => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'kode'        => ['type' => 'VARCHAR', 'constraint' => 20],
-            'nama'        => ['type' => 'VARCHAR', 'constraint' => 100],
-            'kategori_id' => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'merek'       => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],
-            'spek'        => ['type' => 'TEXT', 'null' => true],
-            'harga_jual'  => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'stok_min'    => ['type' => 'INT', 'constraint' => true, 'default' => 0],
-            'foto'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
-            'created_at'  => ['type' => 'DATETIME', 'null' => true],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('kode');
-        $this->forge->addKey('kategori_id');
+        $this->forge->addForeignKey('kategori_id', 'kategori', 'id', 'RESTRICT', 'CASCADE');
         $this->forge->createTable('barang', true);
 
-        // unit = device fisik yang dilacak (barang second)
+        // 4. Riwayat Keluar-Masuk / Penjualan Stok (Tracking ringkas)
         $this->forge->addField([
-            'id'            => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'kode'          => ['type' => 'VARCHAR', 'constraint' => 20],
-            'barang_id'     => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'imei'          => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => true],
-            'kondisi'       => ['type' => 'VARCHAR', 'constraint' => 10, 'default' => 'mulus'],
-            'harga_beli'    => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'supplier_id'   => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'null' => true],
-            'pembelian_id'  => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'null' => true],
-            'tanggal_masuk' => ['type' => 'DATE', 'null' => true],
-            'status'        => ['type' => 'VARCHAR', 'constraint' => 15, 'default' => 'tersedia'],
-            'lokasi'        => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],
-            'catatan'       => ['type' => 'TEXT', 'null' => true],
-            'created_at'    => ['type' => 'DATETIME', 'null' => true],
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'barang_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+            ],
+            'user_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
+            ],
+            'jenis' => [
+                'type'       => 'ENUM',
+                'constraint' => ['masuk', 'keluar', 'penyesuaian'],
+                'default'    => 'masuk',
+            ],
+            'jumlah' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+            ],
+            'harga_transaksi' => [
+                'type'       => 'DECIMAL',
+                'constraint' => '15,2',
+                'null'       => true,
+            ],
+            'total_laba' => [
+                'type'       => 'DECIMAL',
+                'constraint' => '15,2',
+                'default'    => 0.00,
+            ],
+            'keterangan' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+            ],
+            'tanggal' => [
+                'type' => 'DATE',
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('kode');
-        $this->forge->addKey('barang_id');
-        $this->forge->addKey('status');
-        $this->forge->createTable('unit', true);
-
-        // ---------- Pembelian ----------
-        $this->forge->addField([
-            'id'          => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'no'          => ['type' => 'VARCHAR', 'constraint' => 30],
-            'supplier_id' => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'null' => true],
-            'user_id'     => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'tanggal'     => ['type' => 'DATE'],
-            'sumber'      => ['type' => 'VARCHAR', 'constraint' => 25],
-            'url'         => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
-            'total'       => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'uang_muka'   => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'sisa'        => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'metode'      => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
-            'jatuh_tempo' => ['type' => 'DATE', 'null' => true],
-            'catatan'     => ['type' => 'TEXT', 'null' => true],
-            'created_at'  => ['type' => 'DATETIME', 'null' => true],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('no');
-        $this->forge->createTable('pembelian', true);
-
-        // unit yang masuk lewat pembelian tertentu (riwayat batch)
-        $this->forge->addField([
-            'id'            => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'pembelian_id'  => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'unit_id'       => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'harga_beli'    => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addKey(['pembelian_id', 'unit_id']);
-        $this->forge->createTable('pembelian_unit', true);
-
-        // ---------- Penjualan ----------
-        $this->forge->addField([
-            'id'         => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'no'         => ['type' => 'VARCHAR', 'constraint' => 30],
-            'user_id'    => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'tanggal'    => ['type' => 'DATE'],
-            'total'      => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'dibayar'    => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'kembalian'  => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'metode'     => ['type' => 'VARCHAR', 'constraint' => 20, 'default' => 'cash'],
-            'catatan'    => ['type' => 'TEXT', 'null' => true],
-            'created_at' => ['type' => 'DATETIME', 'null' => true],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('no');
-        $this->forge->createTable('penjualan', true);
-
-        // harga_beli di-copy saat sold → laba historis tidak berubah retroactive
-        $this->forge->addField([
-            'id'            => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'penjualan_id'  => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'unit_id'       => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'barang_id'     => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'harga_jual'    => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'harga_beli'    => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'laba'          => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'laba_persen'   => ['type' => 'DECIMAL', 'constraint' => '8,2', 'default' => 0],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addKey(['penjualan_id', 'unit_id']);
-        $this->forge->createTable('penjualan_unit', true);
-
-        // ---------- Utang (hanya sisi pembelian; penjualan cash/COD/TF) ----------
-        $this->forge->addField([
-            'id'            => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'kode'          => ['type' => 'VARCHAR', 'constraint' => 30],
-            'pembelian_id'  => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'null' => true],
-            'supplier_id'   => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'null' => true],
-            'tanggal'       => ['type' => 'DATE'],
-            'jatuh_tempo'   => ['type' => 'DATE', 'null' => true],
-            'nominal'       => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'terbayar'      => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'status'        => ['type' => 'VARCHAR', 'constraint' => 15, 'default' => 'belum'],
-            'catatan'       => ['type' => 'TEXT', 'null' => true],
-            'created_at'    => ['type' => 'DATETIME', 'null' => true],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('kode');
-        $this->forge->createTable('utang', true);
-
-        $this->forge->addField([
-            'id'       => ['type' => 'INT', 'constraint' => true, 'unsigned' => true, 'auto_increment' => true],
-            'utang_id' => ['type' => 'INT', 'constraint' => true, 'unsigned' => true],
-            'tanggal'  => ['type' => 'DATE'],
-            'nominal'  => ['type' => 'DECIMAL', 'constraint' => '15,2', 'default' => 0],
-            'metode'   => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
-            'bukti'    => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
-            'catatan'  => ['type' => 'TEXT', 'null' => true],
-            'created_at' => ['type' => 'DATETIME', 'null' => true],
-        ]);
-        $this->forge->addKey('id', true);
-        $this->forge->addKey('utang_id');
-        $this->forge->createTable('pembayaran', true);
+        $this->forge->addForeignKey('barang_id', 'barang', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('user_id', 'users', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->createTable('riwayat_stok', true);
     }
 
     public function down()
     {
-        $this->forge->dropTable('pembayaran', true);
-        $this->forge->dropTable('utang', true);
-        $this->forge->dropTable('penjualan_unit', true);
-        $this->forge->dropTable('penjualan', true);
-        $this->forge->dropTable('pembelian_unit', true);
-        $this->forge->dropTable('pembelian', true);
-        $this->forge->dropTable('unit', true);
+        $this->forge->dropTable('riwayat_stok', true);
         $this->forge->dropTable('barang', true);
-        $this->forge->dropTable('supplier', true);
         $this->forge->dropTable('kategori', true);
         $this->forge->dropTable('users', true);
     }

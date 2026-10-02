@@ -1,104 +1,119 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
-        <h5 class="mb-0 fw-bold">Manajemen Pengguna</h5>
-        <small class="text-muted">Kelola akun dan hak akses sistem (Role: Admin / Pembeli / Staf)</small>
+        <h4 class="mb-0 fw-bold">Manajemen Hak Akses Pengguna</h4>
+        <small class="text-muted">Standar BNSP: Pemisahan peran hak akses sistem antara <strong>Admin</strong> dan <strong>Pengelola</strong></small>
     </div>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalUser" onclick="resetUserForm()">
-        <i class="bi bi-person-plus me-1"></i> Tambah Pengguna
+    <button class="btn btn-primary btn-sm" onclick="bukaModalUser()">
+        <i class="bi bi-person-plus me-1"></i> Tambah Pengguna Baru
     </button>
 </div>
 
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card p-3 border-start border-4 border-primary">
+            <h6 class="fw-bold mb-1"><i class="bi bi-shield-check text-primary me-1"></i> Peran Admin</h6>
+            <p class="text-muted small mb-0">Memiliki wewenang penuh terhadap seluruh data: kelola akun pengguna, edit & hapus barang, kelola kategori, dan rekap keuntungan.</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3 border-start border-4 border-info">
+            <h6 class="fw-bold mb-1"><i class="bi bi-box-seam text-info me-1"></i> Peran Pengelola</h6>
+            <p class="text-muted small mb-0">Bertanggung jawab pada operasional harian: input data barang, perbarui stok fisik masuk/keluar, dan melihat katalog serta margin jual.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Table Card -->
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>Username</th>
+                    <th style="width:70px">ID</th>
                     <th>Nama Lengkap</th>
-                    <th>Peran (Role)</th>
-                    <th>Status</th>
-                    <th>Tgl Dibuat</th>
+                    <th>Username</th>
+                    <th class="text-center" style="width:120px">Hak Akses</th>
+                    <th>Terdaftar Sejak</th>
                     <th class="text-end" style="width:120px">Aksi</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($users as $u): ?>
-                <tr>
-                    <td><code><?= esc($u['username']) ?></code></td>
-                    <td class="fw-semibold"><?= esc($u['nama']) ?></td>
-                    <td>
-                        <span class="badge <?= $u['role'] === 'admin' ? 'badge-soft-danger' : ($u['role'] === 'pembeli' ? 'badge-soft-info' : 'badge-soft-secondary') ?>">
-                            <?= strtoupper(esc($u['role'])) ?>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge <?= $u['status'] === 'aktif' ? 'badge-soft-success' : 'badge-soft-warning' ?>">
-                            <?= ucfirst(esc($u['status'])) ?>
-                        </span>
-                    </td>
-                    <td class="small text-muted"><?= esc($u['created_at'] ?? '-') ?></td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-secondary" onclick='editUser(<?= json_encode($u) ?>)'><i class="bi bi-pencil"></i></button>
-                        <?php if ((int) $u['id'] !== (int) session('user_id')): ?>
+            <tr>
+                <td class="font-monospace text-muted"><?= (int) $u['id'] ?></td>
+                <td>
+                    <div class="fw-bold"><?= esc($u['nama']) ?></div>
+                    <?php if ($u['id'] === (int) session()->get('user_id')): ?>
+                        <span class="badge bg-secondary" style="font-size:0.65rem;">Sedang Login</span>
+                    <?php endif; ?>
+                </td>
+                <td><span class="font-monospace text-muted">@<?= esc($u['username']) ?></span></td>
+                <td class="text-center">
+                    <?php if ($u['role'] === 'admin'): ?>
+                        <span class="badge badge-soft-primary"><i class="bi bi-shield-lock me-1"></i> Admin</span>
+                    <?php else: ?>
+                        <span class="badge badge-soft-info"><i class="bi bi-boxes me-1"></i> Pengelola</span>
+                    <?php endif; ?>
+                </td>
+                <td><span class="small text-muted"><?= esc($u['created_at'] ?? '-') ?></span></td>
+                <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" onclick='editUser(<?= json_encode($u) ?>)' title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <?php if ($u['id'] !== (int) session()->get('user_id')): ?>
                         <form action="/user/delete/<?= (int) $u['id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Hapus pengguna ini?')">
                             <?= csrf_field() ?>
-                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-outline-danger" title="Hapus"><i class="bi bi-trash"></i></button>
                         </form>
                         <?php endif; ?>
-                    </td>
-                </tr>
+                    </div>
+                </td>
+            </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Modal Form User -->
+<!-- Modal User -->
 <div class="modal fade" id="modalUser" tabindex="-1">
     <div class="modal-dialog">
-        <form class="modal-content" method="POST" action="/user/save">
+        <form class="modal-content" method="POST" action="/user/save" id="formUser">
             <?= csrf_field() ?>
-            <input type="hidden" name="id" id="userId">
+            <input type="hidden" name="id" id="userId" value="0">
             <div class="modal-header">
-                <h6 class="modal-title fw-bold" id="userModalTitle">Tambah Pengguna</h6>
+                <h6 class="modal-title fw-bold" id="modalUserTitle">Tambah Pengguna Baru</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Username</label>
-                    <input type="text" name="username" id="userUsername" class="form-control" required>
+                    <label class="form-label small fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+                    <input type="text" name="nama" id="userNama" class="form-control" required placeholder="Contoh: Budi Santoso">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Nama Lengkap</label>
-                    <input type="text" name="nama" id="userNama" class="form-control" required>
+                    <label class="form-label small fw-semibold">Username Login <span class="text-danger">*</span></label>
+                    <input type="text" name="username" id="userUsername" class="form-control font-monospace" required placeholder="username_login">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Password</label>
-                    <input type="password" name="password" id="userPass" class="form-control" placeholder="Kosongkan bila tidak diubah">
-                    <small class="text-muted" id="userPassHelp">Wajib untuk pengguna baru</small>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Peran (Role)</label>
-                    <select name="role" id="userRole" class="form-select">
-                        <option value="staf">Staf (Gudang/Operasional)</option>
-                        <option value="pembeli">Pembeli (Kasir/Penjualan)</option>
-                        <option value="admin">Administrator (Akses Penuh)</option>
+                    <label class="form-label small fw-semibold">Hak Akses / Peran <span class="text-danger">*</span></label>
+                    <select name="role" id="userRole" class="form-select" required>
+                        <option value="pengelola">Pengelola (Staf Operasional)</option>
+                        <option value="admin">Admin (Akses Penuh)</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">Status</label>
-                    <select name="status" id="userStatus" class="form-select">
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Non-aktif</option>
-                    </select>
+                    <label class="form-label small fw-semibold" id="labelPassword">Password <span class="text-danger">*</span></label>
+                    <input type="password" name="password" id="userPassword" class="form-control" placeholder="Minimal 6 karakter">
+                    <small class="text-muted" id="hintPassword" style="display:none;">Kosongkan password jika tidak ingin mengubahnya.</small>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-sm btn-primary">Simpan Pengguna</button>
             </div>
         </form>
     </div>
@@ -108,28 +123,30 @@
 
 <?= $this->section('scripts') ?>
 <script>
-function resetUserForm() {
-    document.getElementById('userModalTitle').innerText = 'Tambah Pengguna';
-    document.getElementById('userId').value = '';
-    document.getElementById('userUsername').value = '';
+function bukaModalUser() {
+    document.getElementById('userId').value = 0;
     document.getElementById('userNama').value = '';
-    document.getElementById('userPass').value = '';
-    document.getElementById('userPass').required = true;
-    document.getElementById('userPassHelp').innerText = 'Wajib untuk pengguna baru';
-    document.getElementById('userRole').value = 'staf';
-    document.getElementById('userStatus').value = 'aktif';
+    document.getElementById('userUsername').value = '';
+    document.getElementById('userUsername').removeAttribute('readonly');
+    document.getElementById('userRole').value = 'pengelola';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userPassword').setAttribute('required', 'required');
+    document.getElementById('labelPassword').innerHTML = 'Password <span class="text-danger">*</span>';
+    document.getElementById('hintPassword').style.display = 'none';
+    document.getElementById('modalUserTitle').innerText = 'Tambah Pengguna Baru';
+    new bootstrap.Modal(document.getElementById('modalUser')).show();
 }
 
 function editUser(u) {
-    document.getElementById('userModalTitle').innerText = 'Edit Pengguna: ' + u.username;
     document.getElementById('userId').value = u.id;
-    document.getElementById('userUsername').value = u.username;
     document.getElementById('userNama').value = u.nama;
-    document.getElementById('userPass').value = '';
-    document.getElementById('userPass').required = false;
-    document.getElementById('userPassHelp').innerText = 'Kosongkan jika password tidak ingin diubah';
+    document.getElementById('userUsername').value = u.username;
     document.getElementById('userRole').value = u.role;
-    document.getElementById('userStatus').value = u.status;
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userPassword').removeAttribute('required');
+    document.getElementById('labelPassword').innerHTML = 'Password Baru (Opsional)';
+    document.getElementById('hintPassword').style.display = 'block';
+    document.getElementById('modalUserTitle').innerText = 'Edit Pengguna: ' + u.nama;
     new bootstrap.Modal(document.getElementById('modalUser')).show();
 }
 </script>

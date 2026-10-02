@@ -6,54 +6,58 @@ use App\Models\KategoriModel;
 
 class KategoriController extends BaseController
 {
+    protected KategoriModel $kategoriModel;
+
+    public function __construct()
+    {
+        $this->kategoriModel = new KategoriModel();
+    }
+
     public function index()
     {
-        $kategori = new KategoriModel();
+        $kategori = $this->kategoriModel->orderBy('id', 'DESC')->findAll();
 
         return view('kategori/index', [
             'title'    => 'Kategori Barang',
-            'kategori' => $kategori->withJumlahBarang(),
+            'kategori' => $kategori,
         ]);
     }
 
     public function save()
     {
-        $kategori = new KategoriModel();
-        $id       = (int) $this->request->getPost('id');
+        $id = (int) $this->request->getPost('id');
+        $nama = trim((string) $this->request->getPost('nama'));
+        $keterangan = trim((string) $this->request->getPost('keterangan'));
 
-        $data = [
-            'kode'       => strtoupper(trim((string) $this->request->getPost('kode'))),
-            'nama'       => trim((string) $this->request->getPost('nama')),
-            'keterangan' => trim((string) $this->request->getPost('keterangan')) ?: null,
+        $rules = [
+            'nama' => 'required|min_length[2]|max_length[100]',
         ];
 
-        if ($data['kode'] === '' || $data['nama'] === '') {
-            return redirect()->back()->withInput()->with('error', 'Kode dan nama kategori wajib diisi.');
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
+
+        $data = ['nama' => $nama, 'keterangan' => $keterangan];
 
         if ($id > 0) {
-            $kategori->update($id, $data);
-            $msg = 'Kategori berhasil diperbarui.';
-        } else {
-            $kategori->insert($data);
-            $msg = 'Kategori baru berhasil ditambahkan.';
+            $this->kategoriModel->update($id, $data);
+            return redirect()->to('/kategori')->with('sukses', 'Kategori berhasil diperbarui.');
         }
 
-        return redirect()->to('/kategori')->with('sukses', $msg);
+        $this->kategoriModel->insert($data);
+        return redirect()->to('/kategori')->with('sukses', 'Kategori baru berhasil ditambahkan.');
     }
 
     public function delete(int $id)
     {
-        $kategori = new KategoriModel();
-
-        // Cegah hapus bila masih dipakai di barang
-        $terpakai = $kategori->db->table('barang')->where('kategori_id', $id)->countAllResults();
-        if ($terpakai > 0) {
-            return redirect()->to('/kategori')->with('error', "Kategori tidak bisa dihapus: masih digunakan oleh {$terpakai} barang.");
+        // Cek apakah dipakai barang
+        $db = \Config\Database::connect();
+        $dipakai = $db->table('barang')->where('kategori_id', $id)->countAllResults();
+        if ($dipakai > 0) {
+            return redirect()->to('/kategori')->with('error', "Kategori tidak dapat dihapus karena masih digunakan oleh {$dipakai} barang.");
         }
 
-        $kategori->delete($id);
-
+        $this->kategoriModel->delete($id);
         return redirect()->to('/kategori')->with('sukses', 'Kategori berhasil dihapus.');
     }
 }
